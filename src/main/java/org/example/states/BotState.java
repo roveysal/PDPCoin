@@ -1,0 +1,19 @@
+package org.example.states;
+
+public enum BotState{
+    START,
+    REGISTER_TEACHER,
+    REGISTER_STUDENT,
+    MENU_ADMIN,
+    MENU_STUDENT,
+    CHOOSE_TYPE,
+    UPDATE,
+    CONFIRM,
+    MAIN_MENU,
+    SEND_HOMEWORK,
+    SEND_CWORK,
+    SEND_REQ_WEEKLY,
+    SEND_REQ_MONTHLY,
+    TEACHER_PAGE,
+    REG_TEACH_CLASS
+}
