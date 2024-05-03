@@ -123,7 +123,7 @@ public class ButtonService {
         }
         InlineKeyboardButton button4 = new InlineKeyboardButton();
         if (classes[3]){
-            button3.setText("8-sinf ✅");
+            button4.setText("8-sinf ✅");
             button4.setCallbackData("chosen_class_8");
         } else {
             button4.setText("8-sinf");
@@ -250,5 +250,59 @@ public class ButtonService {
 
         return markup;
     }
+    public ReplyKeyboardMarkup classStudent(){
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowlist = new ArrayList<>();
 
+        KeyboardButton button = new KeyboardButton();
+        button.setText("5-sinf");
+
+        KeyboardButton button1 = new KeyboardButton();
+        button1.setText("6-sinf");
+
+        KeyboardButton button2 = new KeyboardButton();
+        button2.setText("7-sinf");
+
+        KeyboardButton button3 = new KeyboardButton();
+        button3.setText("8-sinf");
+
+        KeyboardButton button4 = new KeyboardButton();
+        button4.setText("9-sinf");
+
+        KeyboardButton button5 = new KeyboardButton();
+        button5.setText("10-sinf");
+
+        KeyboardButton button6 = new KeyboardButton();
+        button6.setText("11-sinf");
+
+        KeyboardRow row = new KeyboardRow();
+        KeyboardRow row1 = new KeyboardRow();
+        KeyboardRow row2 = new KeyboardRow();
+        KeyboardRow row3 = new KeyboardRow();
+        KeyboardRow row4 = new KeyboardRow();
+        KeyboardRow row5 = new KeyboardRow();
+        KeyboardRow row6 = new KeyboardRow();
+
+        row.add(button);
+        row1.add(button1);
+        row2.add(button2);
+        row3.add(button3);
+        row4.add(button4);
+        row5.add(button5);
+        row6.add(button6);
+
+        rowlist.add(row);
+        rowlist.add(row1);
+        rowlist.add(row2);
+        rowlist.add(row3);
+        rowlist.add(row4);
+        rowlist.add(row5);
+        rowlist.add(row6);
+        markup.setKeyboard(rowlist);
+        markup.setResizeKeyboard(true);
+        markup.setOneTimeKeyboard(true);
+        markup.setSelective(true);
+
+        return markup;
+    }
 }

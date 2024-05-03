@@ -5,8 +5,6 @@ import org.example.modul.User;
 import org.example.repository.SubjectRepository;
 import org.example.repository.UserRepository;
 import org.example.service.ButtonService;
-import org.example.service.SubjectServiceImpl;
-import org.example.service.UserServiceImpl;
 import org.example.states.BotState;
 import org.example.states.Role;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -21,9 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MyBot extends TelegramLongPollingBot{
-
-
-    private final UserServiceImpl userService = new UserServiceImpl();
     private final ButtonService buttonService = new ButtonService();
     private final UserRepository userRepository = new UserRepository();
     private final SubjectRepository subjectRepository = new SubjectRepository();
@@ -101,7 +96,6 @@ public class MyBot extends TelegramLongPollingBot{
                             sendMessage.setText("Ism familyangizni kiriting");
                             sendMessage.setChatId(chatId);
                             userRepository.updateBotState(chatId, BotState.REGISTER_STUDENT);
-
                             try {
                                 execute(sendMessage);
                             } catch (TelegramApiException e) {
@@ -110,12 +104,13 @@ public class MyBot extends TelegramLongPollingBot{
                         }
                     }
                     case REGISTER_TEACHER -> {
-                        if (text.contains(" ")&&(text.endsWith("ov")||text.endsWith("ev")||text.endsWith("ova")||text.endsWith("eva"))){
+                        if (text.contains(" ")||(text.endsWith("ov")||text.endsWith("ev")||text.endsWith("ova")||text.endsWith("eva"))){
                             SendMessage message1 = new SendMessage();
                             message1.setText("Qaysi fandan dars berasiz?");
                             message1.setChatId(chatId);
                             message1.setReplyMarkup(buttonService.subjects(subjectRepository.getSubjectsNames()));
                             userRepository.updateBotState(chatId, BotState.REG_TEACH_CLASS);
+                            userRepository.updateUserName(chatId, update.getMessage().getText());
                             try {
                                 execute(message1);
                             } catch (TelegramApiException e) {
@@ -136,7 +131,7 @@ public class MyBot extends TelegramLongPollingBot{
                         SendMessage sendMessage = new SendMessage();
                         sendMessage.setText("Sinfni tanlang");
                         sendMessage.setChatId(chatId);
-                        sendMessage.setReplyMarkup(buttonService.classes(new boolean[6]));
+                        sendMessage.setReplyMarkup(buttonService.classes(new boolean[7]));
                         try {
                             execute(sendMessage);
                         } catch (TelegramApiException e) {
@@ -144,34 +139,40 @@ public class MyBot extends TelegramLongPollingBot{
                         }
                     }
                     case REGISTER_STUDENT -> {
-                        if (text.equals(text.contains(" ")&&(text.endsWith("ov")||text.endsWith("ev")||text.endsWith("ova")||text.endsWith("eva")))){
+                        if (text.equals(text.contains(" ")||(text.endsWith("ov")||text.endsWith("ev")||text.endsWith("ova")||text.endsWith("eva")))){
+                            userRepository.updateUserName(chatId, update.getMessage().getText());
                             SendMessage sendMessage = new SendMessage();
                             sendMessage.setText("Sinfingizni tanlang");
-                            sendMessage.setReplyMarkup(buttonService.classes(new boolean[6]));
+                            sendMessage.setReplyMarkup(buttonService.classStudent());
                             try {
                                 execute(sendMessage);
                             } catch (TelegramApiException e) {
                                 throw new RuntimeException(e);
                             }
+                        } else {
+                            message.setText("Ism familyangiz noto'g'ri kiritilgan");
                         }
                     }
-                    case UPDATE -> {
+                    case CONFIRM -> {
+
+                    }
+                    case MENU_ADMIN -> {
                         if (text.equals("Sinflarni ko'rish")) {
-//                            List<String> subjectNames = SubjectRepository.findSubjectName();
-//                            StringBuilder response = new StringBuilder("Mavjud bo'lgan fanlar: \n");
-//                            for (String name : subjectNames) {
-//                                response.append(name).append("\n");
-//                            }
-//                            message.setText(response.toString());
+                            List<Subject> subjectsNames = subjectRepository.getSubjectsNames();
+                            StringBuilder response = new StringBuilder("Mavjud bo'lgan fanlar: \n");
+                            for (Subject name : subjectsNames) {
+                                response.append(name).append("\n");
+                            }
+                            message.setText(response.toString());
 
                         } else if (text.equals("Fanni o'zgartirish")) {
-                            user.setBotState(BotState.UPDATE);
-                            message.setText("Ismni o'zgartirmoqchi bo'lgan fanni kiriting:");
+                            user.setBotState(BotState.UPDATE_SUBJECT);
+                            message.setText("Nomini o'zgartirmoqchi bo'lgan fanni kiriting:");
+                            message.setReplyMarkup(buttonService.subjects(subjectRepository.getSubjectsNames()));
                         } else if (text.equals("F.I.O. ni o'zgartirish")) {
-                            user.setBotState(BotState.UPDATE);
+                            user.setBotState(BotState.UPDATE_NAME);
                             message.setText("Yangi F.I.O. ni kiriting:");
                         } else {
-
                             message.setText("Noto'g'ri so'rov. Iltimos, tanlangan variantni tanlang.");
                         }
                         message.setReplyMarkup(buttonService.adminMenu());
@@ -181,20 +182,30 @@ public class MyBot extends TelegramLongPollingBot{
                             throw new RuntimeException(e);
                         }
                     }
-                    case CONFIRM -> {
+                    case UPDATE_SUBJECT -> {
 
                     }
-                    case MENU_ADMIN -> {
-                        if (text.equals("Sinflarni ko'rish")){
-
-                        }
+                    case UPDATE_NAME -> {
 
                     }
                     case MENU_STUDENT -> {
-
-                    }
-                    case CHOOSE_TYPE -> {
-
+                        if (text.equals("Uy ishini tekshirishga yuborish")){
+                            message.setText("Fanni tanlang");
+                            message.setReplyMarkup(buttonService.subjects(subjectRepository.getSubjectsNames()));
+                            userRepository.updateBotState(chatId, BotState.SEND_HOMEWORK);
+                        } else if (text.equals("Sinf ishini tekshirishga yuborish")) {
+                            message.setText("Fanni tanlang");
+                            message.setReplyMarkup(buttonService.subjects(subjectRepository.getSubjectsNames()));
+                            userRepository.updateBotState(chatId, BotState.SEND_CWORK);
+                        } else if (text.equals("Haftalik nazoratni baholash yuborish")) {
+                            message.setText("Fanni tanlang");
+                            message.setReplyMarkup(buttonService.subjects(subjectRepository.getSubjectsNames()));
+                            userRepository.updateBotState(chatId, BotState.SEND_REQ_WEEKLY);
+                        } else if (text.equals("Oylik nazoratni baholash yuborish")) {
+                            message.setText("Fanni tanlang");
+                            message.setReplyMarkup(buttonService.subjects(subjectRepository.getSubjectsNames()));
+                            userRepository.updateBotState(chatId, BotState.SEND_REQ_MONTHLY);
+                        }
                     }
                     case SEND_CWORK -> {
 
@@ -248,6 +259,7 @@ public class MyBot extends TelegramLongPollingBot{
                     for (InlineKeyboardButton inlineKeyboardButton : inlineKeyboardButtons) {
                         if (inlineKeyboardButton.getCallbackData().contains("chosen_class_")){
                             chosenClasses[i] = Integer.parseInt(inlineKeyboardButton.getCallbackData().substring(13));
+                            userRepository.updateUsersRole(chatId, Role.TEACHER);
                         }
                     }
                 }

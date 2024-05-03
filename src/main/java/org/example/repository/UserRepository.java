@@ -14,9 +14,11 @@ public class UserRepository {
     private final String findById = "SELECT * FROM users WHERE chat_id = ?";
     private final String findBotStateById = "SELECT bot_state FROM users WHERE chat_id = ?";
     private final String findBotRole = "SELECT role FROM users WHERE chat_id = ?";
-    private final String updateById = "UPDATE users SET fullname=?, role=?, bot_state=?, grade = ? WHERE id=?";
+    private final String updateById = "UPDATE users SET full_name=?, role=?, bot_state=?, grade = ? WHERE chat_id=?";
     private final String insertUser =
             "INSERT INTO users (chat_id, bot_state) VALUES(?,?)";
+    private final String updateUserName = "UPDATE users SET full_name=? WHERE chat_id=?";
+    private final String updateUserRole = "UPDATE users SET role=? WHERE chat_id=?";
     private final String updateBotState = "UPDATE users SET bot_state=? WHERE chat_id=?";
 
     public void updateBotState(long chatId, BotState botState) {
@@ -25,6 +27,35 @@ public class UserRepository {
             PreparedStatement preparedStatement = conn.prepareStatement(updateBotState);
 
             preparedStatement.setString(1, botState.name());
+            preparedStatement.setLong(2, chatId);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateUsersRole(long chatId, Role role) {
+        try {
+            Connection conn = CustomDataSource.getInstance().getConnection();
+            PreparedStatement preparedStatement = conn.prepareStatement(updateUserRole);
+
+            preparedStatement.setString(1, role.name());
+            preparedStatement.setLong(2, chatId);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void updateUserName(long chatId, String fullName){
+        try {
+            Connection conn = CustomDataSource.getInstance().getConnection();
+            PreparedStatement preparedStatement = conn.prepareStatement(updateUserName);
+
+            preparedStatement.setString(1, fullName);
             preparedStatement.setLong(2, chatId);
 
             preparedStatement.executeUpdate();
@@ -121,6 +152,7 @@ public class UserRepository {
             throw new RuntimeException(e);
         }
     }
+
 
     public boolean getUpdateById(Long id, User user) {
         try (
